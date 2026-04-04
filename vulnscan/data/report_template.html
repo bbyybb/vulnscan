@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ i18n.report_title }} - {{ report.target }}</title>
+<style>
+  /* ===== Reset & Base ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #0f0f23;
+    color: #e0e0e0;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  a { color: #60a5fa; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ===== Layout ===== */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 20px;
+  }
+
+  /* ===== Header ===== */
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 1px solid #2a2a4a;
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+  }
+
+  .header-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .meta-item {
+    font-size: 14px;
+    color: #9ca3af;
+  }
+
+  .meta-item strong {
+    color: #d1d5db;
+  }
+
+  /* ===== Dashboard Cards ===== */
+  .dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: #16213e;
+    border: 1px solid #2a2a4a;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.15s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .stat-card .count {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .stat-card .label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+    color: #9ca3af;
+  }
+
+  .stat-critical .count { color: #dc2626; }
+  .stat-critical { border-top: 3px solid #dc2626; }
+  .stat-high .count { color: #ea580c; }
+  .stat-high { border-top: 3px solid #ea580c; }
+  .stat-medium .count { color: #ca8a04; }
+  .stat-medium { border-top: 3px solid #ca8a04; }
+  .stat-low .count { color: #2563eb; }
+  .stat-low { border-top: 3px solid #2563eb; }
+  .stat-info .count { color: #6b7280; }
+  .stat-info { border-top: 3px solid #6b7280; }
+
+  /* ===== Section ===== */
+  .section {
+    background: #16213e;
+    border: 1px solid #2a2a4a;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .section h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #2a2a4a;
+  }
+
+  /* ===== Vulnerability Table ===== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #9ca3af;
+    border-bottom: 2px solid #2a2a4a;
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #1e2a45;
+    font-size: 14px;
+    vertical-align: top;
+  }
+
+  tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  /* ===== Severity Badges ===== */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  .badge-critical { background: rgba(220, 38, 38, 0.2); color: #fca5a5; border: 1px solid #dc2626; }
+  .badge-high     { background: rgba(234, 88, 12, 0.2); color: #fdba74; border: 1px solid #ea580c; }
+  .badge-medium   { background: rgba(202, 138, 4, 0.2); color: #fde047; border: 1px solid #ca8a04; }
+  .badge-low      { background: rgba(37, 99, 235, 0.2); color: #93c5fd; border: 1px solid #2563eb; }
+  .badge-info     { background: rgba(107, 114, 128, 0.2); color: #d1d5db; border: 1px solid #6b7280; }
+
+  /* ===== Details Expand ===== */
+  details {
+    margin-top: 6px;
+  }
+
+  details summary {
+    cursor: pointer;
+    font-size: 13px;
+    color: #60a5fa;
+    user-select: none;
+  }
+
+  details summary:hover {
+    color: #93c5fd;
+  }
+
+  details[open] summary {
+    margin-bottom: 8px;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 6px 12px;
+    padding: 12px;
+    background: #0f1729;
+    border-radius: 8px;
+    font-size: 13px;
+    border: 1px solid #1e2a45;
+  }
+
+  .detail-grid .detail-label {
+    color: #9ca3af;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .detail-grid .detail-value {
+    color: #d1d5db;
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+
+  /* ===== Status Badges ===== */
+  .status-success {
+    color: #4ade80;
+    font-weight: 600;
+  }
+
+  .status-fail {
+    color: #f87171;
+    font-weight: 600;
+  }
+
+  /* ===== Footer ===== */
+  .footer {
+    text-align: center;
+    padding: 24px 0;
+    color: #6b7280;
+    font-size: 13px;
+    border-top: 1px solid #2a2a4a;
+    margin-top: 8px;
+  }
+
+  /* ===== Empty State ===== */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+    font-size: 15px;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 768px) {
+    .container { padding: 12px; }
+    .header { padding: 20px; }
+    .header h1 { font-size: 22px; }
+    .stat-card .count { font-size: 28px; }
+    table { font-size: 13px; }
+    thead th, tbody td { padding: 8px 6px; }
+    .detail-grid { grid-template-columns: 100px 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ===== Header ===== -->
+  <div class="header">
+    <h1>{{ i18n.report_title }}</h1>
+    <div class="header-meta">
+      <div class="meta-item"><strong>{{ i18n.report_target }}:</strong> {{ report.target }}</div>
+      <div class="meta-item"><strong>{{ i18n.report_mode }}:</strong> {{ report.scan_mode }}</div>
+      <div class="meta-item"><strong>{{ i18n.report_start_time }}:</strong> {{ report.start_time | timestamp_fmt }}</div>
+      <div class="meta-item"><strong>{{ i18n.report_end_time }}:</strong> {{ report.end_time | timestamp_fmt }}</div>
+      <div class="meta-item"><strong>{{ i18n.report_duration }}:</strong> {{ "%.2f" | format(report.end_time - report.start_time) }}s</div>
+    </div>
+  </div>
+
+  <!-- ===== Severity Dashboard ===== -->
+  <div class="dashboard">
+    <div class="stat-card stat-critical">
+      <div class="count">{{ summary.critical }}</div>
+      <div class="label">{{ i18n.common_critical }}</div>
+    </div>
+    <div class="stat-card stat-high">
+      <div class="count">{{ summary.high }}</div>
+      <div class="label">{{ i18n.common_high }}</div>
+    </div>
+    <div class="stat-card stat-medium">
+      <div class="count">{{ summary.medium }}</div>
+      <div class="label">{{ i18n.common_medium }}</div>
+    </div>
+    <div class="stat-card stat-low">
+      <div class="count">{{ summary.low }}</div>
+      <div class="label">{{ i18n.common_low }}</div>
+    </div>
+    <div class="stat-card stat-info">
+      <div class="count">{{ summary.info }}</div>
+      <div class="label">{{ i18n.common_info }}</div>
+    </div>
+  </div>
+
+  <!-- ===== Vulnerability List ===== -->
+  <div class="section">
+    <h2>{{ i18n.report_vuln_list }} ({{ summary.total }})</h2>
+    {% if vulnerabilities %}
+    <table>
+      <thead>
+        <tr>
+          <th>{{ i18n.report_severity }}</th>
+          <th>{{ i18n.report_name }}</th>
+          <th>{{ i18n.report_scanner }}</th>
+          <th>{{ i18n.report_location }}</th>
+          <th>{{ i18n.report_confidence }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for vuln in vulnerabilities %}
+        <tr>
+          <td><span class="badge badge-{{ vuln.severity.value }}">{{ vuln.severity.value }}</span></td>
+          <td>
+            {{ vuln.name }}
+            <details>
+              <summary>{{ i18n.report_details }}</summary>
+              <div class="detail-grid">
+                <span class="detail-label">{{ i18n.report_description }}</span>
+                <span class="detail-value">{{ vuln.description or "-" }}</span>
+                <span class="detail-label">{{ i18n.report_evidence }}</span>
+                <span class="detail-value">{{ vuln.evidence or "-" }}</span>
+                <span class="detail-label">{{ i18n.report_remediation }}</span>
+                <span class="detail-value">{{ vuln.remediation or "-" }}</span>
+                <span class="detail-label">{{ i18n.report_reference }}</span>
+                <span class="detail-value">{% if vuln.reference %}{% if vuln.reference.startswith(('http://', 'https://')) %}<a href="{{ vuln.reference }}" target="_blank" rel="noopener">{{ vuln.reference }}</a>{% else %}{{ vuln.reference }}{% endif %}{% else %}-{% endif %}</span>
+                <span class="detail-label">CVE</span>
+                <span class="detail-value">{{ vuln.cve_id or "-" }}</span>
+                <span class="detail-label">CWE</span>
+                <span class="detail-value">{{ vuln.cwe_id or "-" }}</span>
+              </div>
+            </details>
+          </td>
+          <td>{{ vuln.scanner }}</td>
+          <td>{{ vuln.location or vuln.target or "-" }}</td>
+          <td>{{ vuln.confidence }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">{{ i18n.report_no_vulns }}</div>
+    {% endif %}
+  </div>
+
+  <!-- ===== Scanner Summary ===== -->
+  <div class="section">
+    <h2>{{ i18n.report_scanner_summary }}</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>{{ i18n.report_scanner }}</th>
+          <th>{{ i18n.report_type }}</th>
+          <th>{{ i18n.report_duration }}</th>
+          <th>{{ i18n.report_status }}</th>
+          <th>{{ i18n.report_findings }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for result in results %}
+        <tr>
+          <td>{{ result.scanner_name }}</td>
+          <td>{{ result.scan_type.value }}</td>
+          <td>{{ "%.2f" | format(result.duration_seconds) }}s</td>
+          <td>
+            {% if result.success %}
+              <span class="status-success">{{ i18n.report_success }}</span>
+            {% else %}
+              <span class="status-fail">{{ i18n.report_failed }}</span>
+              {% if result.error_message %}
+                <br><small style="color:#9ca3af;">{{ result.error_message }}</small>
+              {% endif %}
+            {% endif %}
+          </td>
+          <td>{{ result.vulnerabilities | length }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <div class="footer">
+    {{ i18n.report_generated_by }} &mdash; {{ generated_at }}
+  </div>
+
+</div>
+</body>
+</html>

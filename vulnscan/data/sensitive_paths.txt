@@ -1,0 +1,137 @@
+# 敏感路径字典
+# 格式: path;severity;description
+# severity: critical, high, medium, low, info
+
+# --- Git/SVN 版本控制 ---
+/.git/HEAD;high;Git repository HEAD file exposed
+/.git/config;high;Git configuration exposed
+/.svn/entries;high;SVN repository metadata exposed
+/.svn/wc.db;high;SVN working copy database exposed
+/.hg/dirstate;high;Mercurial repository exposed
+
+# --- 环境配置文件 ---
+/.env;critical;Environment file with secrets exposed
+/.env.local;critical;Local environment file exposed
+/.env.production;critical;Production environment file exposed
+/.env.backup;critical;Environment backup file exposed
+/.env.old;critical;Old environment file exposed
+
+# --- 数据库备份 ---
+/backup.sql;critical;SQL backup file exposed
+/db.sql;critical;Database dump exposed
+/database.sql;critical;Database dump exposed
+/dump.sql;critical;Database dump exposed
+/backup.zip;high;Backup archive exposed
+/backup.tar.gz;high;Backup archive exposed
+/backup.bak;high;Backup file exposed
+
+# --- PHP 配置 ---
+/config.php;high;PHP config file exposed
+/config.php.bak;critical;PHP config backup with credentials
+/wp-config.php;critical;WordPress config file
+/configuration.php;high;Joomla config file
+/phpinfo.php;high;PHP info page exposed
+/info.php;high;PHP info page exposed
+/php.ini;high;PHP configuration exposed
+
+# --- 管理后台 ---
+/admin;medium;Admin panel path accessible
+/admin/login;medium;Admin login page
+/administrator;medium;Administrator panel
+/wp-admin;medium;WordPress admin panel
+/wp-login.php;medium;WordPress login page
+/manager;medium;Manager interface
+/cpanel;medium;cPanel interface
+/phpmyadmin;high;phpMyAdmin interface exposed
+/pma;high;phpMyAdmin shortcut exposed
+/adminer.php;high;Adminer database tool exposed
+/console;medium;Debug console
+
+# --- 服务器状态 ---
+/server-status;medium;Apache server status page
+/server-info;medium;Apache server info page
+/nginx_status;medium;Nginx status page
+/.htaccess;medium;Apache configuration file
+/.htpasswd;critical;Apache password file exposed
+/web.config;medium;IIS configuration file
+
+# --- API 文档 ---
+/api/swagger-ui.html;medium;Swagger API docs exposed
+/swagger-ui.html;medium;Swagger API docs exposed
+/api-docs;medium;API documentation exposed
+/api/v1/docs;low;API documentation
+/graphql;medium;GraphQL endpoint exposed
+/graphiql;medium;GraphiQL interface exposed
+
+# --- Spring Boot Actuator ---
+/actuator;high;Spring Boot actuator endpoint
+/actuator/env;critical;Spring Boot environment endpoint
+/actuator/heapdump;critical;Spring Boot heap dump endpoint
+/actuator/configprops;high;Spring Boot config properties
+/actuator/mappings;medium;Spring Boot URL mappings
+/actuator/health;info;Spring Boot health endpoint
+/actuator/beans;medium;Spring Boot beans endpoint
+
+# --- 调试/开发 ---
+/debug;medium;Debug endpoint
+/trace;medium;Trace endpoint
+/metrics;low;Metrics endpoint
+/debug/pprof;high;Go pprof debug endpoint
+/debug/vars;medium;Go expvar debug endpoint
+/_profiler;high;Symfony profiler
+/elmah.axd;high;ASP.NET error log
+
+# --- 敏感文件 ---
+/.DS_Store;low;macOS directory metadata exposed
+/Thumbs.db;low;Windows thumbnail cache
+/.bash_history;critical;Bash history file exposed
+/.ssh/id_rsa;critical;SSH private key exposed
+/id_rsa;critical;SSH private key exposed
+/.npmrc;high;NPM config with tokens
+/.dockerenv;medium;Docker environment marker
+/docker-compose.yml;medium;Docker compose config exposed
+/Dockerfile;low;Dockerfile exposed
+
+# --- 常见CMS ---
+/wp-json/wp/v2/users;medium;WordPress user enumeration
+/xmlrpc.php;medium;WordPress XML-RPC endpoint
+/feed;info;RSS feed
+/sitemap.xml;info;Sitemap file
+/robots.txt;info;Robots file
+/crossdomain.xml;low;Flash cross-domain policy
+/clientaccesspolicy.xml;low;Silverlight cross-domain policy
+
+# --- 其他 ---
+/.well-known/security.txt;info;Security.txt file
+/.well-known/openid-configuration;info;OpenID configuration
+/cgi-bin/;medium;CGI directory accessible
+/test;low;Test endpoint
+/test.html;low;Test page
+/install;medium;Installation page
+/setup;medium;Setup wizard
+/readme.html;low;Readme file exposed
+/CHANGELOG.md;low;Changelog exposed
+/LICENSE;info;License file
+
+# ── Node.js / 前端 ──
+/node_modules;info;Node.js dependencies directory exposure
+/package.json;low;Node.js package manifest exposure
+/.env.development;high;Development environment configuration file
+# ── Java / Tomcat ──
+/WEB-INF/web.xml;high;Java web application deployment descriptor
+/META-INF/;medium;Java application metadata directory
+/manager/html;high;Tomcat Manager web interface
+# ── Laravel ──
+/storage/logs/laravel.log;high;Laravel application log file
+/telescope;medium;Laravel Telescope debug dashboard
+# ── IDE 配置 ──
+/.idea/;low;JetBrains IDE configuration directory
+/.vscode/;low;Visual Studio Code configuration directory
+# ── 中文互联网常见备份 ──
+/www.zip;critical;Website backup archive
+/web.zip;critical;Website backup archive
+/wwwroot.zip;critical;Website root backup archive
+/1.sql;critical;Database backup file
+/site.tar.gz;high;Website backup tarball
+# ── 其他 ──
+/Makefile;info;Build configuration file exposure

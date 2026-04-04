@@ -1,0 +1,120 @@
+{
+  "hardcoded_secret": {
+    "patterns": [
+      "(?i)(password|passwd|pwd|secret|api[_-]?key|apikey|token|access[_-]?key|secret[_-]?key)\\s*[=:]\\s*['\"][^'\"]{8,}['\"]",
+      "(?i)AKIA[0-9A-Z]{16}",
+      "(?i)-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----",
+      "(?i)(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36,}",
+      "(?i)sk-[A-Za-z0-9]{20,}",
+      "(?i)xox[bpoas]-[A-Za-z0-9-]+"
+    ],
+    "severity": "high",
+    "description": "Hardcoded secret or credential detected in source code",
+    "cwe_id": "CWE-798",
+    "remediation": "Move secrets to environment variables or use a dedicated secrets manager (e.g., HashiCorp Vault, AWS Secrets Manager)"
+  },
+  "sql_injection": {
+    "patterns": [
+      "(?i)(execute|cursor\\.execute|query)\\s*\\(\\s*[\"'].*[\"']\\s*%\\s*\\(",
+      "(?i)f[\"']\\s*(SELECT|INSERT|UPDATE|DELETE)\\s+.*\\{",
+      "(?i)[\"']\\s*(SELECT|INSERT|UPDATE|DELETE)\\s+.*[\"']\\s*\\+\\s*",
+      "(?i)[\"']\\s*(SELECT|INSERT|UPDATE|DELETE)\\s+.*[\"']\\s*\\.format\\("
+    ],
+    "severity": "high",
+    "description": "Possible SQL injection via string concatenation or formatting",
+    "cwe_id": "CWE-89",
+    "remediation": "Use parameterized queries or ORM methods instead of string concatenation"
+  },
+  "xss_pattern": {
+    "patterns": [
+      "(?i)innerHTML\\s*=\\s*[^\"']*\\+",
+      "(?i)document\\.write\\s*\\(",
+      "(?i)\\$\\(.*\\)\\.html\\s*\\(",
+      "(?i)v-html\\s*=",
+      "(?i)dangerouslySetInnerHTML"
+    ],
+    "severity": "medium",
+    "description": "Possible Cross-Site Scripting (XSS) vulnerability",
+    "cwe_id": "CWE-79",
+    "remediation": "Sanitize user input and use textContent instead of innerHTML, or use framework-provided escaping"
+  },
+  "command_injection": {
+    "patterns": [
+      "(?i)(os\\.system|os\\.popen|subprocess\\.call|subprocess\\.Popen)\\s*\\(\\s*[^)]*\\+",
+      "(?i)(os\\.system|os\\.popen)\\s*\\(\\s*f[\"']",
+      "(?i)eval\\s*\\(\\s*(request|params|input|user)",
+      "(?i)exec\\s*\\(\\s*(request|params|input|user)",
+      "(?i)subprocess\\.(call|run|Popen)\\s*\\(.*shell\\s*=\\s*True"
+    ],
+    "severity": "high",
+    "description": "Possible command injection vulnerability",
+    "cwe_id": "CWE-78",
+    "remediation": "Use subprocess with list arguments, avoid shell=True, and validate all user inputs"
+  },
+  "path_traversal": {
+    "patterns": [
+      "(?i)open\\s*\\(\\s*[^)]*\\+\\s*(request|params|input|user)",
+      "(?i)(send_file|send_from_directory)\\s*\\(\\s*[^)]*\\+",
+      "(?i)os\\.path\\.join\\s*\\([^)]*request"
+    ],
+    "severity": "high",
+    "description": "Possible path traversal vulnerability",
+    "cwe_id": "CWE-22",
+    "remediation": "Validate and sanitize file paths, use allowlists, and avoid using user input directly in file operations"
+  },
+  "insecure_random": {
+    "patterns": [
+      "(?i)random\\.(randint|choice|random|randrange|sample)\\s*\\(",
+      "(?i)Math\\.random\\s*\\("
+    ],
+    "severity": "low",
+    "description": "Use of non-cryptographic random number generator in potentially security-sensitive context",
+    "cwe_id": "CWE-338",
+    "remediation": "Use secrets module (Python) or crypto.getRandomValues (JS) for security-sensitive randomness"
+  },
+  "debug_enabled": {
+    "patterns": [
+      "(?i)DEBUG\\s*=\\s*True",
+      "(?i)app\\.run\\s*\\(.*debug\\s*=\\s*True"
+    ],
+    "severity": "medium",
+    "description": "Debug mode appears to be enabled",
+    "cwe_id": "CWE-489",
+    "remediation": "Disable debug mode in production deployments"
+  },
+  "weak_crypto": {
+    "patterns": [
+      "(?i)hashlib\\.(md5|sha1)\\s*\\(",
+      "(?i)\\bDES\\b\\.new\\(",
+      "(?i)\\bRC4\\b",
+      "(?i)\\bBlowfish\\b"
+    ],
+    "severity": "low",
+    "description": "Use of weak or deprecated cryptographic algorithm",
+    "cwe_id": "CWE-327",
+    "remediation": "Use SHA-256 or stronger hash functions, and AES-256 for encryption"
+  },
+  "insecure_deserialization": {
+    "patterns": [
+      "(?i)pickle\\.loads?\\s*\\(",
+      "(?i)yaml\\.load\\s*\\((?!.*Loader)",
+      "(?i)marshal\\.loads?\\s*\\(",
+      "(?i)jsonpickle\\.decode\\s*\\("
+    ],
+    "severity": "high",
+    "description": "Possible insecure deserialization",
+    "cwe_id": "CWE-502",
+    "remediation": "Avoid deserializing untrusted data. Use yaml.safe_load() instead of yaml.load(), avoid pickle for untrusted input"
+  },
+  "ssrf_pattern": {
+    "patterns": [
+      "(?i)requests\\.(get|post|put|delete|head|patch)\\s*\\(\\s*(request\\.|params\\.|input|user)",
+      "(?i)urllib\\.request\\.urlopen\\s*\\(\\s*(request\\.|params\\.|input|user)",
+      "(?i)http\\.client\\.HTTPConnection\\s*\\(\\s*(request\\.|params\\.|input|user)"
+    ],
+    "severity": "high",
+    "description": "Possible Server-Side Request Forgery (SSRF) via user-controlled URL",
+    "cwe_id": "CWE-918",
+    "remediation": "Validate and sanitize URLs, use allowlists for permitted domains, and avoid passing user input directly to HTTP request functions"
+  }
+}

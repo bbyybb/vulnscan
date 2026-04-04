@@ -1,0 +1,129 @@
+name: Build & Release
+
+on:
+  push:
+    tags: ['v*']
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows-x64
+            ext: .exe
+          - os: macos-13        # Intel
+            platform: macos-x64
+            ext: ""
+          - os: macos-latest    # Apple Silicon (M-series)
+            platform: macos-arm64
+            ext: ""
+          - os: ubuntu-latest
+            platform: linux-x64
+            ext: ""
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pyinstaller
+
+      - name: Run tests
+        run: python -m pytest tests/ -v --ignore=tests/test_integration.py
+
+      - name: Build CLI and GUI executables
+        shell: bash
+        run: |
+          SEP=":"
+          ICON_ARG=""
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            SEP=";"
+            ICON_ARG="--icon=vulnscan/assets/icon.ico"
+          fi
+
+          python -m PyInstaller --onefile --clean --noconfirm \
+            --name=vulnscan-cli \
+            --distpath=dist --workpath=build --specpath=build \
+            --add-data="vulnscan/data${SEP}vulnscan/data" \
+            --add-data="vulnscan/assets${SEP}vulnscan/assets" \
+            --add-data="vulnscan/locale${SEP}vulnscan/locale" \
+            $ICON_ARG main.py
+
+          python -m PyInstaller --onefile --clean --noconfirm --windowed \
+            --name=vulnscan \
+            --distpath=dist --workpath=build --specpath=build \
+            --add-data="vulnscan/data${SEP}vulnscan/data" \
+            --add-data="vulnscan/assets${SEP}vulnscan/assets" \
+            --add-data="vulnscan/locale${SEP}vulnscan/locale" \
+            $ICON_ARG main.py
+
+      - name: Rename artifacts
+        shell: bash
+        run: |
+          cd dist
+          for f in vulnscan-cli${{ matrix.ext }} vulnscan${{ matrix.ext }}; do
+            if [ -f "$f" ]; then
+              base="${f%${{ matrix.ext }}}"
+              mv "$f" "${base}-${{ matrix.platform }}${{ matrix.ext }}"
+            fi
+          done
+          ls -la
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulnscan-${{ matrix.platform }}
+          path: dist/vulnscan-*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate SHA256 checksums
+        shell: bash
+        run: |
+          cd artifacts
+          : > ../SHA256SUMS.txt
+          for dir in */; do
+            for file in "$dir"*; do
+              if [ -f "$file" ]; then
+                sha256sum "$file" >> ../SHA256SUMS.txt
+              fi
+            done
+          done
+          mv ../SHA256SUMS.txt .
+          echo "=== SHA256 Checksums ==="
+          cat SHA256SUMS.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/**/*
+            artifacts/SHA256SUMS.txt
+          generate_release_notes: true
+          draft: false
+          prerelease: false
