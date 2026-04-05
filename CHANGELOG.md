@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 本文件记录项目的所有重要变更。
 
+## [1.0.1] - 2026-04-06
+
+### Changed / 变更
+
+- Theme system redesigned with Apple Human Interface Guidelines color palette / 主题系统采用 Apple 人机界面指南配色方案重新设计
+  - 2 themes: Light (浅色) and Aqua (深色) / 两套主题：Light 浅色 + Aqua 深色
+  - Auto-detects system dark/light mode on macOS and Windows at startup / 启动时自动检测 macOS 和 Windows 的系统深色/浅色模式
+  - Theme-aware severity colors, start/stop buttons, links, and dialogs / 严重程度颜色、按钮、链接和对话框均跟随主题
+
 ## [1.0.0] - 2026-04-02
 
 ### Added / 新增

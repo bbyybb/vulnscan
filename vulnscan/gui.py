@@ -38,35 +38,56 @@ from vulnscan.report import ReportGenerator
 _IS_MACOS = platform.system() == "Darwin"
 
 
+def _detect_system_dark_mode() -> bool:
+    """检测操作系统是否处于深色模式。"""
+    if _IS_MACOS:
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["defaults", "read", "-g", "AppleInterfaceStyle"],
+                capture_output=True, text=True, timeout=3,
+            )
+            return result.stdout.strip().lower() == "dark"
+        except Exception:
+            return False
+    if platform.system() == "Windows":
+        try:
+            import winreg
+            key = winreg.OpenKey(
+                winreg.HKEY_CURRENT_USER,
+                r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
+            )
+            value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
+            winreg.CloseKey(key)
+            return value == 0  # 0 = 深色模式
+        except Exception:
+            return False
+    return False
+
+
 # ------------------------------------------------------------------
 # Color mapping for severity tags
 # ------------------------------------------------------------------
 
 def _get_severity_colors(theme_name: str) -> dict[str, str]:
     """返回指定主题下的严重程度颜色（确保在不同背景上都可读）。"""
-    if theme_name == "light":
+    if theme_name == "aqua":
+        # 深色背景上使用 Apple 亮色系
         return {
-            "critical": "#d32f2f",
-            "high": "#e65100",
-            "medium": "#bf8f00",
-            "low": "#1565c0",
-            "info": "#616161",
+            "critical": "#ff453a",
+            "high": "#ff9f0a",
+            "medium": "#ffd60a",
+            "low": "#64d2ff",
+            "info": "#98989d",
         }
-    elif theme_name == "matrix":
+    else:  # light
+        # 浅色背景上使用 Apple 深色系
         return {
-            "critical": "#ff1744",
-            "high": "#ff9100",
-            "medium": "#ffea00",
-            "low": "#00e5ff",
-            "info": "#69f0ae",
-        }
-    else:  # cyber
-        return {
-            "critical": "#ff6b6b",
-            "high": "#ffa94d",
-            "medium": "#ffd43b",
-            "low": "#74c0fc",
-            "info": "#adb5bd",
+            "critical": "#ff3b30",
+            "high": "#ff9500",
+            "medium": "#c69500",
+            "low": "#007aff",
+            "info": "#8e8e93",
         }
 
 # 向后兼容: 默认导出 light 主题的颜色
@@ -76,114 +97,80 @@ SEVERITY_COLORS: dict[str, str] = _get_severity_colors("light")
 # Theme definitions / 主题定义
 # ------------------------------------------------------------------
 
+# 色板参考: Apple Human Interface Guidelines
+# Light = macOS 浅色外观; Aqua = macOS 深色外观
 THEMES: dict[str, dict[str, str]] = {
     "light": {
-        "bg": "#f5f5f5",
-        "fg": "#1a1a1a",
-        "frame_bg": "#f5f5f5",
-        "border": "#cccccc",
+        "bg": "#f5f5f7",
+        "fg": "#1d1d1f",
+        "frame_bg": "#ffffff",
+        "border": "#d2d2d7",
         "entry_bg": "#ffffff",
-        "entry_fg": "#1a1a1a",
+        "entry_fg": "#1d1d1f",
         "text_bg": "#ffffff",
-        "text_fg": "#1a1a1a",
-        "btn_bg": "#e8e8e8",
-        "btn_fg": "#1a1a1a",
-        "label_bg": "#f5f5f5",
-        "label_fg": "#333333",
-        "status_bg": "#e8e8e8",
-        "status_fg": "#333333",
-        "link_fg": "#0066cc",
-        "tooltip_bg": "#ffffcc",
-        "tooltip_fg": "#333333",
+        "text_fg": "#1d1d1f",
+        "btn_bg": "#e5e5ea",
+        "btn_fg": "#1d1d1f",
+        "label_bg": "#ffffff",
+        "label_fg": "#3a3a3c",
+        "status_bg": "#e5e5ea",
+        "status_fg": "#3a3a3c",
+        "link_fg": "#007aff",
+        "tooltip_bg": "#f2f2f7",
+        "tooltip_fg": "#3a3a3c",
         "tree_bg": "#ffffff",
-        "tree_fg": "#1a1a1a",
-        "tree_sel_bg": "#0078d7",
+        "tree_fg": "#1d1d1f",
+        "tree_sel_bg": "#007aff",
         "tree_sel_fg": "#ffffff",
-        "tree_heading_bg": "#e0e0e0",
-        "tree_heading_fg": "#1a1a1a",
-        "tab_bg": "#e8e8e8",
+        "tree_heading_bg": "#e5e5ea",
+        "tree_heading_fg": "#3a3a3c",
+        "tab_bg": "#e5e5ea",
         "tab_sel_bg": "#ffffff",
-        "scrollbar": "#c0c0c0",
-        "scrollbar_trough": "#f0f0f0",
-        "progress_fg": "#27ae60",
-        "donate_fg": "#e67e22",
-        "start_bg": "#27ae60",
-        "start_hover": "#2ecc71",
-        "stop_bg": "#c0392b",
-        "stop_hover": "#e74c3c",
+        "scrollbar": "#c7c7cc",
+        "scrollbar_trough": "#f2f2f7",
+        "progress_fg": "#34c759",
+        "donate_fg": "#ff9500",
+        "start_bg": "#34c759",
+        "start_hover": "#30d158",
+        "stop_bg": "#ff3b30",
+        "stop_hover": "#ff453a",
         "btn_text": "#ffffff",
     },
-    "cyber": {
-        "bg": "#0d1117",
-        "fg": "#c9d1d9",
-        "frame_bg": "#161b22",
-        "border": "#30363d",
-        "entry_bg": "#21262d",
-        "entry_fg": "#e6edf3",
-        "text_bg": "#0d1117",
-        "text_fg": "#c9d1d9",
-        "btn_bg": "#21262d",
-        "btn_fg": "#c9d1d9",
-        "label_bg": "#161b22",
-        "label_fg": "#8b949e",
-        "status_bg": "#010409",
-        "status_fg": "#58a6ff",
-        "link_fg": "#58a6ff",
-        "tooltip_bg": "#21262d",
-        "tooltip_fg": "#c9d1d9",
-        "tree_bg": "#0d1117",
-        "tree_fg": "#c9d1d9",
-        "tree_sel_bg": "#1f6feb",
+    "aqua": {
+        "bg": "#1c1c1e",
+        "fg": "#f5f5f7",
+        "frame_bg": "#2c2c2e",
+        "border": "#38383a",
+        "entry_bg": "#3a3a3c",
+        "entry_fg": "#f5f5f7",
+        "text_bg": "#1c1c1e",
+        "text_fg": "#f5f5f7",
+        "btn_bg": "#3a3a3c",
+        "btn_fg": "#f5f5f7",
+        "label_bg": "#2c2c2e",
+        "label_fg": "#98989d",
+        "status_bg": "#1c1c1e",
+        "status_fg": "#0a84ff",
+        "link_fg": "#0a84ff",
+        "tooltip_bg": "#3a3a3c",
+        "tooltip_fg": "#f5f5f7",
+        "tree_bg": "#1c1c1e",
+        "tree_fg": "#f5f5f7",
+        "tree_sel_bg": "#0a84ff",
         "tree_sel_fg": "#ffffff",
-        "tree_heading_bg": "#161b22",
-        "tree_heading_fg": "#8b949e",
-        "tab_bg": "#161b22",
-        "tab_sel_bg": "#0d1117",
-        "scrollbar": "#30363d",
-        "scrollbar_trough": "#161b22",
-        "progress_fg": "#58a6ff",
-        "donate_fg": "#e67e22",
-        "start_bg": "#238636",
-        "start_hover": "#2ea043",
-        "stop_bg": "#da3633",
-        "stop_hover": "#f85149",
+        "tree_heading_bg": "#2c2c2e",
+        "tree_heading_fg": "#98989d",
+        "tab_bg": "#2c2c2e",
+        "tab_sel_bg": "#1c1c1e",
+        "scrollbar": "#48484a",
+        "scrollbar_trough": "#2c2c2e",
+        "progress_fg": "#0a84ff",
+        "donate_fg": "#ff9f0a",
+        "start_bg": "#30d158",
+        "start_hover": "#34c759",
+        "stop_bg": "#ff453a",
+        "stop_hover": "#ff3b30",
         "btn_text": "#ffffff",
-    },
-    "matrix": {
-        "bg": "#0a0a0a",
-        "fg": "#00ff41",
-        "frame_bg": "#0d0d0d",
-        "border": "#003b00",
-        "entry_bg": "#141414",
-        "entry_fg": "#00ff41",
-        "text_bg": "#0a0a0a",
-        "text_fg": "#00ff41",
-        "btn_bg": "#1a2e1a",
-        "btn_fg": "#00ff41",
-        "label_bg": "#0d0d0d",
-        "label_fg": "#00cc33",
-        "status_bg": "#000000",
-        "status_fg": "#00ff41",
-        "link_fg": "#00e5ff",
-        "tooltip_bg": "#1a2e1a",
-        "tooltip_fg": "#00ff41",
-        "tree_bg": "#0a0a0a",
-        "tree_fg": "#00ff41",
-        "tree_sel_bg": "#004d00",
-        "tree_sel_fg": "#00ff41",
-        "tree_heading_bg": "#0d0d0d",
-        "tree_heading_fg": "#00cc33",
-        "tab_bg": "#0d0d0d",
-        "tab_sel_bg": "#0a0a0a",
-        "scrollbar": "#003b00",
-        "scrollbar_trough": "#0d0d0d",
-        "progress_fg": "#00ff41",
-        "donate_fg": "#00e5ff",
-        "start_bg": "#00802b",
-        "start_hover": "#00b33c",
-        "stop_bg": "#b71c1c",
-        "stop_hover": "#e53935",
-        "btn_text": "#00ff41",
     },
 }
 
@@ -241,13 +228,22 @@ class VulnScanGUI:
         self._vuln_index: dict = {}  # treeview item_id -> Vulnerability object
         self._scanner_status_labels: dict[str, tk.Label] = {}  # 扫描器状态 Label
         self._link_widgets: list[tk.Label] = []  # 需要保持 link_fg 的标签
-        self._current_theme = "light"  # 当前主题
+        # 根据系统深色/浅色模式自动选择初始主题
+        self._current_theme = "aqua" if _detect_system_dark_mode() else "light"
 
         # 保存需要刷新文本的控件引用
         self._text_refs: dict[str, object] = {}
 
         self._build_ui()
         self._refresh_scanner_list()
+
+        # 立即应用主题 (确保从启动就是一致的外观，避免原生主题→自定义主题的闪烁)
+        self._apply_theme()
+        # 更新主题切换按钮文字
+        if self._current_theme == "aqua":
+            self.theme_btn.configure(text=t("gui.light_theme"))
+        else:
+            self.theme_btn.configure(text=t("gui.dark_theme"))
 
     # ==================================================================
     # UI Construction
@@ -601,20 +597,14 @@ class VulnScanGUI:
     # Theme switching / 主题切换
     # ==================================================================
 
-    _THEME_ORDER = ["light", "cyber", "matrix"]
-    _THEME_LABELS = {
-        "light": "gui.dark_theme",    # 当前 light → 按钮显示下一主题名
-        "cyber": "Matrix",
-        "matrix": "gui.light_theme",
-    }
-
     def _toggle_theme(self) -> None:
-        """在 light → cyber → matrix 三个主题间循环切换。"""
-        idx = self._THEME_ORDER.index(self._current_theme)
-        self._current_theme = self._THEME_ORDER[(idx + 1) % len(self._THEME_ORDER)]
+        """在 light 和 aqua 两个主题间切换。"""
+        self._current_theme = "aqua" if self._current_theme == "light" else "light"
         self._apply_theme()
-        label = self._THEME_LABELS.get(self._current_theme, "Theme")
-        self.theme_btn.configure(text=t(label) if label.startswith("gui.") else label)
+        if self._current_theme == "aqua":
+            self.theme_btn.configure(text=t("gui.light_theme"))
+        else:
+            self.theme_btn.configure(text=t("gui.dark_theme"))
 
     def _apply_theme(self) -> None:
         """应用当前主题到所有控件（含 ttk 控件）。"""
@@ -844,7 +834,7 @@ class VulnScanGUI:
         self.browse_btn.configure(text=t("gui.browse"))
         self.http_opts_frame.configure(text=t("gui.http_options"))
         self.curl_btn.configure(text=t("gui.parse_curl"))
-        if self._current_theme == "cyber":
+        if self._current_theme == "aqua":
             self.theme_btn.configure(text=t("gui.light_theme"))
         else:
             self.theme_btn.configure(text=t("gui.dark_theme"))

@@ -67,23 +67,21 @@ class TestModuleConstants:
             assert len(color) == 7, f"{key}: {color} 长度应为 7"
 
     def test_themes_keys(self):
-        """THEMES 应包含 light、cyber 和 matrix 三个主题。"""
+        """THEMES 应包含 light 和 aqua 两个主题。"""
         from vulnscan.gui import THEMES
 
-        assert set(THEMES.keys()) == {"light", "cyber", "matrix"}
+        assert set(THEMES.keys()) == {"light", "aqua"}
 
     def test_themes_have_same_keys(self):
-        """所有主题应具有完全相同的颜色键集合。"""
+        """两个主题应具有完全相同的颜色键集合。"""
         from vulnscan.gui import THEMES
 
-        theme_names = list(THEMES.keys())
-        base_keys = set(THEMES[theme_names[0]].keys())
-        for name in theme_names[1:]:
-            other_keys = set(THEMES[name].keys())
-            assert base_keys == other_keys, (
-                f"主题颜色键不匹配。仅 {theme_names[0]}: {base_keys - other_keys}; "
-                f"仅 {name}: {other_keys - base_keys}"
-            )
+        light_keys = set(THEMES["light"].keys())
+        aqua_keys = set(THEMES["aqua"].keys())
+        assert light_keys == aqua_keys, (
+            f"主题颜色键不匹配。仅 light: {light_keys - aqua_keys}; "
+            f"仅 aqua: {aqua_keys - light_keys}"
+        )
 
     def test_themes_required_keys(self):
         """两个主题都应包含核心颜色键。"""
@@ -168,12 +166,10 @@ class TestVulnScanGUI:
     # -- 主题切换 --
 
     def test_toggle_theme(self, gui):
-        """_toggle_theme 应在 light → cyber → matrix → light 之间循环切换。"""
+        """_toggle_theme 应在 light 和 aqua 之间切换。"""
         assert gui._current_theme == "light"
         gui._toggle_theme()
-        assert gui._current_theme == "cyber"
-        gui._toggle_theme()
-        assert gui._current_theme == "matrix"
+        assert gui._current_theme == "aqua"
         gui._toggle_theme()
         assert gui._current_theme == "light"
 

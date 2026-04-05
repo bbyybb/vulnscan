@@ -334,12 +334,12 @@ GUI_MESSAGES: dict[str, dict[str, str]] = {
         "zh": "选择文件",
     },
     "gui.dark_theme": {
-        "en": "Cyber",
-        "zh": "深邃",
+        "en": "Aqua",
+        "zh": "深色",
     },
     "gui.light_theme": {
         "en": "Light",
-        "zh": "明亮",
+        "zh": "浅色",
     },
     "gui.invalid_exe_msg": {
         "en": "The selected file is not a valid executable:\n{path}\n\nPlease select the correct program file.",

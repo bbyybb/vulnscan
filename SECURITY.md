@@ -8,6 +8,7 @@ The following versions of VulnScan receive security updates:
 
 | Version / 版本 | Supported / 支持状态 |
 |---------------|---------------------|
+| 1.0.1         | :white_check_mark: Yes / 是 |
 | 1.0.0         | :white_check_mark: Yes / 是 |
 | < 1.0.0       | :x: No / 否 |
 
