@@ -30,9 +30,9 @@ from vulnscan.integrity import (
     startup_check,
 )
 from vulnscan.locale.messages import register_all
-from vulnscan.models import HttpOptions, ScanReport, Severity
+from vulnscan.models import HttpOptions, ScanReport
 from vulnscan.utils import parse_curl
-from vulnscan.registry import check_all_tools, get_scanners_for_mode
+from vulnscan.registry import check_all_tools
 from vulnscan.report import ReportGenerator
 
 _IS_MACOS = platform.system() == "Darwin"
@@ -1219,7 +1219,8 @@ class VulnScanGUI:
                 )
                 self.root.after(0, lambda: self._on_scan_finished(report))
             except Exception as exc:
-                self.root.after(0, lambda: self._on_scan_error(str(exc)))
+                err_msg = str(exc)
+                self.root.after(0, lambda: self._on_scan_error(err_msg))
 
         self._scan_thread = threading.Thread(target=_run, daemon=True)
         self._scan_thread.start()

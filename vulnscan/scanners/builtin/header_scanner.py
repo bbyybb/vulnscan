@@ -6,7 +6,6 @@ import time
 from typing import Callable, Optional
 
 import requests
-import urllib3
 
 from vulnscan.i18n import t
 from vulnscan.models import HttpOptions, ScanResult, ScanType, Severity, Vulnerability

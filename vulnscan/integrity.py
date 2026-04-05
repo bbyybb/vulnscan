@@ -19,7 +19,6 @@ import hashlib
 import os
 import sys
 import time
-from functools import lru_cache
 from typing import Optional
 
 # ── Internal constants (obfuscated) ──────────────────────────────────

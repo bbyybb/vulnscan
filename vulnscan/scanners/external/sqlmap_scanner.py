@@ -30,7 +30,6 @@ class SqlmapScanner(ExternalScanner):
         http_options: Optional[HttpOptions] = None,
     ) -> ScanResult:
         start = time.time()
-        vulns: list[Vulnerability] = []
 
         # 创建临时输出目录
         tmp_dir = tempfile.mkdtemp(prefix="sqlmap_")

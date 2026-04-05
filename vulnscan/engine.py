@@ -10,13 +10,13 @@ import threading
 import time
 import warnings
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Callable, Optional
+from typing import Callable
 
 import urllib3
 
 from vulnscan.i18n import t
 from vulnscan.integrity import deferred_asset_check, require_seal
-from vulnscan.models import HttpOptions, ScanReport, ScanResult, ScanType
+from vulnscan.models import HttpOptions, ScanReport, ScanResult
 from vulnscan.registry import get_scanners_for_mode
 from vulnscan.scanners.base import Scanner
 

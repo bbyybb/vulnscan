@@ -202,7 +202,7 @@ class NmapScanner(ExternalScanner):
             # ---- UDP 扫描 (top 100 端口) ----
             try:
                 if callback:
-                    callback(f"[Nmap] TCP 扫描完成，正在进行 UDP 扫描 (top 100) ...")
+                    callback("[Nmap] TCP 扫描完成，正在进行 UDP 扫描 (top 100) ...")
 
                 udp_result = self._run_command(
                     [

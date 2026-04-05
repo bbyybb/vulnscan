@@ -130,7 +130,6 @@ class FfufScanner(ExternalScanner):
         http_options: Optional[HttpOptions] = None,
     ) -> ScanResult:
         start = time.time()
-        vulns: list[Vulnerability] = []
 
         if callback:
             callback(f"[ffuf] 正在扫描 {target} ...")
@@ -211,10 +210,7 @@ class FfufScanner(ExternalScanner):
                 cmd.extend(["-X", http_options.method.upper()])
 
         try:
-            result = self._run_command(
-                cmd,
-                timeout=300,
-            )
+            self._run_command(cmd, timeout=300)
         except Exception as exc:
             return ScanResult(
                 scanner_name=self.name,

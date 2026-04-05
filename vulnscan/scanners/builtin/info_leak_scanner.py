@@ -94,7 +94,7 @@ class InfoLeakScanner(Scanner):
                         k, v = item.strip().split("=", 1)
                         session.cookies.set(k.strip(), v.strip())
 
-        try:  # noqa: wrapped for session cleanup in finally
+        try:
             # ── 主请求 ──────────────────────────────────────
             if callback:
                 callback(t("scanner.info.requesting", target=target))
