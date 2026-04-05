@@ -293,9 +293,9 @@ class VulnScanGUI:
         author_label.pack(side=tk.LEFT)
         self._text_refs["author_label"] = author_label
 
-        self.donate_btn = tk.Button(
-            about_frame, text=t("gui.donate"), fg="#e67e22",
-            font=("", 9), bd=0,
+        self.donate_btn = ttk.Button(
+            about_frame, text=t("gui.donate"),
+            style="Donate.TButton",
             command=self._show_donate_dialog,
         )
         try:
@@ -740,7 +740,7 @@ class VulnScanGUI:
             except tk.TclError:
                 pass
 
-        # 7) 开始/停止按钮 (ttk 样式)
+        # 7) 开始/停止/打赏按钮 (ttk 样式)
         style.configure("Start.TButton",
                          background=c["start_bg"], foreground=c["btn_text"])
         style.map("Start.TButton",
@@ -749,6 +749,8 @@ class VulnScanGUI:
                          background=c["stop_bg"], foreground=c["btn_text"])
         style.map("Stop.TButton",
                    background=[("active", c["stop_hover"])])
+        style.configure("Donate.TButton",
+                         foreground=c["donate_fg"])
 
         # 9) 重新应用 Treeview severity 行颜色
         try:
