@@ -16,12 +16,13 @@ jobs:
           - os: windows-latest
             platform: windows-x64
             ext: .exe
-          - os: macos-13        # Intel
-            platform: macos-x64
-            ext: ""
-          - os: macos-latest    # Apple Silicon (M-series)
+          - os: macos-latest    # Apple Silicon (native)
             platform: macos-arm64
             ext: ""
+          - os: macos-latest    # Intel (via Rosetta on ARM runner)
+            platform: macos-x64
+            ext: ""
+            python_arch: x64
           - os: ubuntu-latest
             platform: linux-x64
             ext: ""
@@ -35,6 +36,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+          architecture: ${{ matrix.python_arch || '' }}
           cache: 'pip'
 
       - name: Install dependencies
@@ -58,7 +60,7 @@ jobs:
 
           python -m PyInstaller --onefile --clean --noconfirm \
             --name=vulnscan-cli \
-            --distpath=dist --workpath=build --specpath=build \
+            --distpath=dist \
             --add-data="vulnscan/data${SEP}vulnscan/data" \
             --add-data="vulnscan/assets${SEP}vulnscan/assets" \
             --add-data="vulnscan/locale${SEP}vulnscan/locale" \
@@ -66,7 +68,7 @@ jobs:
 
           python -m PyInstaller --onefile --clean --noconfirm --windowed \
             --name=vulnscan \
-            --distpath=dist --workpath=build --specpath=build \
+            --distpath=dist \
             --add-data="vulnscan/data${SEP}vulnscan/data" \
             --add-data="vulnscan/assets${SEP}vulnscan/assets" \
             --add-data="vulnscan/locale${SEP}vulnscan/locale" \
