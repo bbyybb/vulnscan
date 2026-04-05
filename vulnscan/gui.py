@@ -308,58 +308,41 @@ class VulnScanGUI:
         action_frame = tk.Frame(parent)
         action_frame.pack(fill=tk.X, padx=4, pady=4, side=tk.BOTTOM)
 
-        if _IS_MACOS:
-            self.start_btn = ttk.Button(
-                action_frame, text=t("gui.start_scan"),
-                command=self._start_scan,
-            )
-            self.start_btn.pack(fill=tk.X, pady=(0, 2))
-            self.stop_btn = ttk.Button(
-                action_frame, text=t("gui.stop_scan"),
-                command=self._stop_scan, state=tk.DISABLED,
-            )
-            self.stop_btn.pack(fill=tk.X)
-        else:
-            _c = THEMES[self._current_theme]
-            self.start_btn = tk.Button(
-                action_frame, text=t("gui.start_scan"),
-                bg=_c["start_bg"], fg=_c["btn_text"],
-                activebackground=_c["start_hover"], activeforeground=_c["btn_text"],
-                command=self._start_scan,
-            )
-            self.start_btn.pack(fill=tk.X, pady=(0, 2))
-            self.stop_btn = tk.Button(
-                action_frame, text=t("gui.stop_scan"),
-                bg=_c["stop_bg"], fg=_c["btn_text"],
-                activebackground=_c["stop_hover"], activeforeground=_c["btn_text"],
-                command=self._stop_scan, state=tk.DISABLED,
-            )
-            self.stop_btn.pack(fill=tk.X)
+        self.start_btn = ttk.Button(
+            action_frame, text=t("gui.start_scan"),
+            style="Start.TButton", command=self._start_scan,
+        )
+        self.start_btn.pack(fill=tk.X, pady=(0, 2))
+        self.stop_btn = ttk.Button(
+            action_frame, text=t("gui.stop_scan"),
+            style="Stop.TButton", command=self._stop_scan, state=tk.DISABLED,
+        )
+        self.stop_btn.pack(fill=tk.X)
 
         # ── 然后 pack 顶部和中间区域 ──
 
         # Language selector
-        lang_frame = tk.LabelFrame(parent, text=t("gui.language"), padx=6, pady=4)
+        lang_frame = ttk.LabelFrame(parent, text=t("gui.language"), padding=(6, 4))
         lang_frame.pack(fill=tk.X, padx=4, pady=(4, 2))
         self._text_refs["lang_frame"] = lang_frame
 
         lang_btn_row = tk.Frame(lang_frame)
         lang_btn_row.pack(fill=tk.X)
 
-        self.lang_en_btn = tk.Button(
+        self.lang_en_btn = ttk.Button(
             lang_btn_row, text="English",
             command=lambda: self._switch_language("en"),
         )
         self.lang_en_btn.pack(side=tk.LEFT, padx=(0, 4))
 
-        self.lang_zh_btn = tk.Button(
+        self.lang_zh_btn = ttk.Button(
             lang_btn_row, text="中文",
             command=lambda: self._switch_language("zh"),
         )
         self.lang_zh_btn.pack(side=tk.LEFT)
 
         # 主题切换按钮
-        self.theme_btn = tk.Button(
+        self.theme_btn = ttk.Button(
             lang_btn_row, text=t("gui.dark_theme"),
             command=self._toggle_theme,
         )
@@ -368,22 +351,22 @@ class VulnScanGUI:
         self._update_lang_btn_state()
 
         # Scan mode
-        self.mode_frame = tk.LabelFrame(parent, text=t("gui.scan_mode"), padx=6, pady=4)
+        self.mode_frame = ttk.LabelFrame(parent, text=t("gui.scan_mode"), padding=(6, 4))
         self.mode_frame.pack(fill=tk.X, padx=4, pady=(4, 2))
 
-        self.web_radio = tk.Radiobutton(
+        self.web_radio = ttk.Radiobutton(
             self.mode_frame, text=t("gui.web_scan"), variable=self.scan_mode,
             value="web", command=self._on_mode_change,
         )
         self.web_radio.pack(anchor=tk.W)
-        self.code_radio = tk.Radiobutton(
+        self.code_radio = ttk.Radiobutton(
             self.mode_frame, text=t("gui.code_scan"), variable=self.scan_mode,
             value="code", command=self._on_mode_change,
         )
         self.code_radio.pack(anchor=tk.W)
 
         # Target input
-        self.target_frame = tk.LabelFrame(parent, text=t("gui.target"), padx=6, pady=4)
+        self.target_frame = ttk.LabelFrame(parent, text=t("gui.target"), padding=(6, 4))
         self.target_frame.pack(fill=tk.X, padx=4, pady=2)
 
         entry_row = tk.Frame(self.target_frame)
@@ -391,13 +374,13 @@ class VulnScanGUI:
         self.target_entry = tk.Entry(entry_row, textvariable=self.target_var)
         self.target_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
-        self.browse_btn = tk.Button(entry_row, text=t("gui.browse"), command=self._browse)
+        self.browse_btn = ttk.Button(entry_row, text=t("gui.browse"), command=self._browse)
         self.browse_btn.pack(side=tk.RIGHT, padx=(4, 0))
         # Browse only active in code mode
         self._update_browse_state()
 
         # HTTP Options (Web 模式直接显示, Code 模式隐藏)
-        self.http_opts_frame = tk.LabelFrame(parent, text=t("gui.http_options"), padx=6, pady=4)
+        self.http_opts_frame = ttk.LabelFrame(parent, text=t("gui.http_options"), padding=(6, 4))
         self.http_opts_frame.pack(fill=tk.X, padx=4, pady=2)
 
         # HTTP 方法 + Parse curl 按钮
@@ -410,7 +393,7 @@ class VulnScanGUI:
             values=["GET", "POST", "PUT", "DELETE", "HEAD"],
             state="readonly", width=10,
         ).pack(side=tk.LEFT)
-        self.curl_btn = tk.Button(
+        self.curl_btn = ttk.Button(
             method_row, text=t("gui.parse_curl"), command=self._show_curl_dialog,
         )
         self.curl_btn.pack(side=tk.RIGHT)
@@ -433,16 +416,16 @@ class VulnScanGUI:
         self.data_text.pack(fill=tk.X)
 
         # Scanner list (scrollable)
-        self.scanner_frame = tk.LabelFrame(parent, text=t("gui.scanners"), padx=6, pady=4)
+        self.scanner_frame = ttk.LabelFrame(parent, text=t("gui.scanners"), padding=(6, 4))
         self.scanner_frame.pack(fill=tk.BOTH, expand=True, padx=4, pady=2)
 
         btn_row = tk.Frame(self.scanner_frame)
         btn_row.pack(fill=tk.X, pady=(0, 4))
-        self.select_all_btn = tk.Button(
+        self.select_all_btn = ttk.Button(
             btn_row, text=t("gui.select_all"), command=self._select_all_scanners
         )
         self.select_all_btn.pack(side=tk.LEFT, padx=(0, 4))
-        self.builtin_only_btn = tk.Button(
+        self.builtin_only_btn = ttk.Button(
             btn_row, text=t("gui.builtin_only"), command=self._select_builtin_only
         )
         self.builtin_only_btn.pack(side=tk.LEFT)
@@ -460,7 +443,7 @@ class VulnScanGUI:
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         # Progress
-        self.progress_frame = tk.LabelFrame(parent, text=t("gui.progress"), padx=6, pady=4)
+        self.progress_frame = ttk.LabelFrame(parent, text=t("gui.progress"), padding=(6, 4))
         self.progress_frame.pack(fill=tk.BOTH, expand=False, padx=4, pady=2)
 
         self.progress_var = tk.DoubleVar(value=0)
@@ -504,15 +487,15 @@ class VulnScanGUI:
         export_frame = tk.Frame(parent)
         export_frame.pack(fill=tk.X, padx=4, pady=4, side=tk.BOTTOM)
 
-        self.export_json_btn = tk.Button(
+        self.export_json_btn = ttk.Button(
             export_frame, text=t("gui.export_json"), command=self._export_json
         )
         self.export_json_btn.pack(side=tk.LEFT, padx=(0, 4))
-        self.export_html_btn = tk.Button(
+        self.export_html_btn = ttk.Button(
             export_frame, text=t("gui.export_html"), command=self._export_html
         )
         self.export_html_btn.pack(side=tk.LEFT, padx=(0, 4))
-        self.export_both_btn = tk.Button(
+        self.export_both_btn = ttk.Button(
             export_frame, text=t("gui.export_both"), command=self._export_both
         )
         self.export_both_btn.pack(side=tk.LEFT)
@@ -566,8 +549,8 @@ class VulnScanGUI:
         self.tree.bind("<<TreeviewSelect>>", self._on_tree_select)
 
         # -- 下部: 漏洞详情（可拖拽调整高度）--
-        self.detail_frame = tk.LabelFrame(
-            results_paned, text=t("gui.vuln_detail"), padx=6, pady=4
+        self.detail_frame = ttk.LabelFrame(
+            results_paned, text=t("gui.vuln_detail"), padding=(6, 4)
         )
         results_paned.add(self.detail_frame, minsize=80)
 
@@ -612,6 +595,22 @@ class VulnScanGUI:
 
         # 1) 根窗口
         self.root.configure(bg=c["bg"])
+
+        # macOS: 告诉系统窗口使用 dark/light 外观
+        # 避免系统 vibrant 效果覆盖自定义颜色
+        if _IS_MACOS:
+            appearance = "darkaqua" if self._current_theme == "aqua" else "aqua"
+            try:
+                self.root.tk.call(
+                    "::tk::unsupported::MacWindowStyle",
+                    "isdark", self.root, "1" if self._current_theme == "aqua" else "0"
+                )
+            except tk.TclError:
+                pass
+            try:
+                self.root.wm_attributes("-appearance", appearance)
+            except tk.TclError:
+                pass
 
         # 2) ttk.Style — 使用 clam 主题引擎（支持完整颜色控制）
         style = ttk.Style()
@@ -683,6 +682,29 @@ class VulnScanGUI:
         style.map("TButton",
                    background=[("active", c["border"])])
 
+        # macOS 关键: ttk 控件样式 (macOS 上 tk 原生控件 fg 不生效)
+        style.configure("TCheckbutton",
+                         background=c["frame_bg"], foreground=c["fg"],
+                         indicatorcolor=c["entry_bg"])
+        style.map("TCheckbutton",
+                   background=[("active", c["frame_bg"])],
+                   foreground=[("active", c["fg"])],
+                   indicatorcolor=[("selected", c["link_fg"])])
+
+        style.configure("TRadiobutton",
+                         background=c["frame_bg"], foreground=c["fg"],
+                         indicatorcolor=c["entry_bg"])
+        style.map("TRadiobutton",
+                   background=[("active", c["frame_bg"])],
+                   foreground=[("active", c["fg"])],
+                   indicatorcolor=[("selected", c["link_fg"])])
+
+        style.configure("TLabelframe",
+                         background=c["frame_bg"],
+                         bordercolor=c["border"])
+        style.configure("TLabelframe.Label",
+                         background=c["frame_bg"], foreground=c["fg"])
+
         # 3) 递归设置所有 tk 控件
         self._apply_colors_recursive(self.root, c)
 
@@ -718,24 +740,15 @@ class VulnScanGUI:
             except tk.TclError:
                 pass
 
-        # 7) 开始/停止按钮 (颜色跟随主题微调)
-        try:
-            if not _IS_MACOS:
-                self.start_btn.configure(
-                    bg=c["start_bg"], fg=c["btn_text"],
-                    activebackground=c["start_hover"], activeforeground=c["btn_text"])
-                self.stop_btn.configure(
-                    bg=c["stop_bg"], fg=c["btn_text"],
-                    activebackground=c["stop_hover"], activeforeground=c["btn_text"])
-        except (tk.TclError, AttributeError):
-            pass
-
-        # 8) 打赏按钮保持品牌橙色
-        try:
-            if not _IS_MACOS and hasattr(self, "donate_btn"):
-                self.donate_btn.configure(fg=c["donate_fg"])
-        except (tk.TclError, AttributeError):
-            pass
+        # 7) 开始/停止按钮 (ttk 样式)
+        style.configure("Start.TButton",
+                         background=c["start_bg"], foreground=c["btn_text"])
+        style.map("Start.TButton",
+                   background=[("active", c["start_hover"])])
+        style.configure("Stop.TButton",
+                         background=c["stop_bg"], foreground=c["btn_text"])
+        style.map("Stop.TButton",
+                   background=[("active", c["stop_hover"])])
 
         # 9) 重新应用 Treeview severity 行颜色
         try:
@@ -810,12 +823,13 @@ class VulnScanGUI:
     def _update_lang_btn_state(self) -> None:
         """更新语言按钮的视觉状态，高亮当前语言。"""
         current = get_language()
+        # ttk.Button 用 disabled 状态表示"当前选中"
         if current == "en":
-            self.lang_en_btn.configure(relief=tk.SUNKEN)
-            self.lang_zh_btn.configure(relief=tk.RAISED)
+            self.lang_en_btn.state(["disabled"])
+            self.lang_zh_btn.state(["!disabled"])
         else:
-            self.lang_en_btn.configure(relief=tk.RAISED)
-            self.lang_zh_btn.configure(relief=tk.SUNKEN)
+            self.lang_en_btn.state(["!disabled"])
+            self.lang_zh_btn.state(["disabled"])
 
     def _refresh_texts(self) -> None:
         """刷新所有 UI 控件的文本为当前语言。"""
@@ -920,8 +934,8 @@ class VulnScanGUI:
             if not available and not is_builtin:
                 label += " (N/A)"
 
-            cb = tk.Checkbutton(
-                row, text=label, variable=var, anchor=tk.W,
+            cb = ttk.Checkbutton(
+                row, text=label, variable=var,
             )
             if not available and not is_builtin:
                 cb.configure(state=tk.DISABLED)
@@ -929,9 +943,8 @@ class VulnScanGUI:
 
             # 非内置工具: 始终显示 "浏览" + "安装" 按钮
             if not is_builtin:
-                browse_btn = tk.Button(
+                browse_btn = ttk.Button(
                     row, text=t("gui.browse_exe"),
-                    font=("", 7),
                     command=lambda name=tool["name"]: self._browse_tool_path(name),
                 )
                 browse_btn.pack(side=tk.RIGHT, padx=(0, 2))
@@ -1100,8 +1113,8 @@ class VulnScanGUI:
             if path:
                 self.target_var.set(path)
 
-        tk.Button(btn_row, text=t("gui.select_dir"), width=12, command=_pick_dir).pack(side=tk.LEFT, padx=8)
-        tk.Button(btn_row, text=t("gui.select_file"), width=12, command=_pick_file).pack(side=tk.LEFT, padx=8)
+        ttk.Button(btn_row, text=t("gui.select_dir"), width=12, command=_pick_dir).pack(side=tk.LEFT, padx=8)
+        ttk.Button(btn_row, text=t("gui.select_file"), width=12, command=_pick_file).pack(side=tk.LEFT, padx=8)
 
         # 应用当前主题
         self._apply_colors_recursive(dlg, THEMES[self._current_theme])
@@ -1139,8 +1152,8 @@ class VulnScanGUI:
 
         btn_row = tk.Frame(dlg)
         btn_row.pack(fill=tk.X, padx=8, pady=(0, 8))
-        tk.Button(btn_row, text=t("gui.parse_and_fill"), command=_parse_and_fill).pack(side=tk.LEFT)
-        tk.Button(btn_row, text=t("gui.close"), command=dlg.destroy).pack(side=tk.RIGHT)
+        ttk.Button(btn_row, text=t("gui.parse_and_fill"), command=_parse_and_fill).pack(side=tk.LEFT)
+        ttk.Button(btn_row, text=t("gui.close"), command=dlg.destroy).pack(side=tk.RIGHT)
 
         # 应用当前主题
         c = THEMES[self._current_theme]
@@ -1547,7 +1560,7 @@ class VulnScanGUI:
                 link.bind("<Button-1>", lambda e, url=link_url: webbrowser.open(url))
 
         # 关闭按钮
-        tk.Button(
+        ttk.Button(
             dlg, text=t("gui.close"), command=dlg.destroy, width=12,
         ).pack(pady=(8, 12))
 
